@@ -1,0 +1,67 @@
+---
+export const prerender = true;
+import { getCollection } from 'astro:content';
+const posts = (await getCollection('blog')).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+---
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Nieuws Nijmegen | De Nijmegen Gids</title>
+  <meta name="description" content="Het laatste nieuws uit Nijmegen en omgeving." />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/assets/gids2026.css" />
+</head>
+<body>
+<a class="focus:bg-brand-600 focus:fixed focus:left-3 focus:not-sr-only focus:px-4 focus:py-2 focus:rounded focus:text-white focus:top-3 focus:z-50 sr-only" href="#main">Naar hoofdinhoud</a>
+<header class="bg-[color:var(--surface)] border-[color:var(--color-brand-700)] border-b-2 sticky top-0 z-50">
+  <div class="bg-[color:var(--color-brand-800)] text-white">
+    <div class="items-center flex justify-between container-page font-medium py-1.5 text-[11px] tracking-wide">
+      <span class="items-center inline-flex gap-1.5">Nijmegen &middot; gemeente Nijmegen</span>
+      <span class="sm:inline hidden text-[color:var(--color-brand-200)]">De digitale stadsgids</span>
+    </div>
+  </div>
+  <div class="container-page">
+    <div class="items-center flex justify-between h-16 md:h-[4.5rem]">
+      <a class="items-center inline-flex gap-2.5 group" href="/" aria-label="De Nijmegen Gids home">
+        <svg aria-hidden="true" class="flex-shrink-0 h-9 md:h-10 md:w-10 w-9" fill="none" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><rect height="30" width="3" fill="var(--color-brand-700)" rx="1.5" x="18.5" y="6"></rect><path d="M8 9 H 29 L 34 13.5 L 29 18 H 8 Z" fill="var(--color-accent-500)"></path><path d="M32 21 H 12 L 7 25.5 L 12 30 H 32 Z" fill="var(--color-brand-600)"></path><rect height="2" width="14" fill="#fff" rx="1" x="11" y="12.5" opacity="0.9"></rect><rect height="2" width="13" fill="#fff" rx="1" x="15" y="24.5" opacity="0.9"></rect></svg>
+        <span class="transition-colors font-bold font-display leading-tight text-xl tracking-tight md:text-2xl text-[color:var(--text)]">De<span class="text-[color:var(--color-accent-500)]">Nijmegen</span>Gids</span>
+      </a>
+      <nav aria-label="Hoofdmenu" class="items-center hidden gap-0.5 md:flex">
+        <a class="transition-colors rounded-lg text-sm font-semibold px-3.5 py-2 hover:bg-[color:var(--surface-muted)] hover:text-[color:var(--text)] text-[color:var(--text-muted)]" href="/">Home</a>
+        <a class="transition-colors rounded-lg text-sm font-semibold px-3.5 py-2 hover:bg-[color:var(--surface-muted)] hover:text-[color:var(--text)] text-[color:var(--text-muted)]" href="/bedrijvengids/">Bedrijvengids</a>
+        <a class="transition-colors rounded-lg text-sm font-semibold px-3.5 py-2 bg-[color:var(--color-brand-50)] dark:bg-brand-950/40 dark:text-brand-200 text-[color:var(--color-brand-800)]" href="/blog/">Nieuws</a>
+        <a class="transition-colors rounded-lg text-sm font-semibold px-3.5 py-2 hover:bg-[color:var(--surface-muted)] hover:text-[color:var(--text)] text-[color:var(--text-muted)]" href="/weer-nijmegen/">Weer</a>
+        <a class="transition-colors rounded-lg text-sm font-semibold px-3.5 py-2 hover:bg-[color:var(--surface-muted)] hover:text-[color:var(--text)] text-[color:var(--text-muted)]" href="/112-nijmegen/">112 Meldingen</a>
+        <a class="transition-colors rounded-lg text-sm font-semibold px-3.5 py-2 hover:bg-[color:var(--surface-muted)] hover:text-[color:var(--text)] text-[color:var(--text-muted)]" href="/contact/">Contact</a>
+      </nav>
+      <div class="items-center flex gap-2">
+        <a class="transition-colors rounded-lg items-center font-bold text-white bg-[color:var(--color-accent-500)] h-9 hidden hover:bg-[color:var(--color-accent-600)] md:inline-flex px-4 text-xs" href="/contact/">Bedrijf aanmelden</a>
+      </div>
+    </div>
+  </div>
+</header>
+<main id="main">
+<section class="section-pad bg-[color:var(--bg)]"><div class="container-page">
+  <h1 class="!text-[clamp(2.2rem,1.5rem+3.2vw,3.9rem)] !leading-[1.08] mb-8">Nieuws Nijmegen</h1>
+  <div class="grid lg:grid-cols-3 sm:grid-cols-2 gap-x-6 gap-y-8">
+    {posts.map((post) => (
+      <a class="group block" href={`/${post.id}/`}>
+        <p class="font-semibold text-[color:var(--text-muted)] mb-1.5 text-xs">{post.data.pubDate.toISOString().slice(0, 10)}</p>
+        <h3 class="transition-colors font-semibold !leading-snug !text-lg dark:group-hover:text-brand-300 font-display group-hover:text-[color:var(--color-brand-700)] text-[color:var(--text)]">{post.data.title}</h3>
+        <p class="text-sm text-[color:var(--text-muted)] mt-2 leading-relaxed line-clamp-2">{post.data.description}</p>
+      </a>
+    ))}
+  </div>
+</div></section>
+</main>
+<footer class="bg-[color:var(--color-brand-900)] mt-24 text-[color:var(--color-brand-100)]">
+  <div class="container-page md:py-16 py-14">
+    <div class="text-xs flex flex-col gap-3 items-start justify-between md:flex-row md:items-center text-[color:var(--color-brand-300)]">
+      <p>&copy; <span data-current-year>2026</span>&nbsp;De Nijmegen Gids &middot; denijmegengids.nl</p>
+    </div>
+  </div>
+</footer>
+<script>document.querySelectorAll("[data-current-year]").forEach(e=>{e.textContent=(new Date()).getFullYear().toString()})</script>
+</body>
+</html>
