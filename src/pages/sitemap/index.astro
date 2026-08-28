@@ -1,13 +1,60 @@
 ---
 export const prerender = true;
+import fs from 'node:fs';
+import path from 'node:path';
+import { getCollection } from 'astro:content';
+
+// Titels uit de gegenereerde pagina's lezen: "Naam - Categorie in Nijmegen | De Nijmegen Gids"
+const pagesDir = path.resolve('src/pages');
+const bedrijvenPerCategorie = new Map<string, { naam: string; slug: string }[]>();
+const gidsPaginas: { naam: string; slug: string }[] = [];
+
+for (const slug of fs.readdirSync(pagesDir).sort()) {
+  const bestand = path.join(pagesDir, slug, 'index.astro');
+  // deze pagina zelf overslaan: haar frontmatter bevat een <title>-regex die de match zou vervuilen
+  if (slug === 'sitemap' || !fs.existsSync(bestand)) continue;
+  const bron = fs.readFileSync(bestand, 'utf-8').slice(0, 4000);
+  const rauw = bron.match(/<title>([\s\S]*?)<\/title>/)?.[1] ?? slug;
+  const titel = rauw
+    .replace(/&amp;/g, '&')
+    .replace(/&middot;/g, '·')
+    .replace(/&eacute;/g, 'é')
+    .replace(' | De Nijmegen Gids', '')
+    .split(' | ')[0]
+    .trim();
+  const bedrijf = titel.match(/^(.*?) - (.+) in Nijmegen$/);
+  if (bedrijf) {
+    const categorie = bedrijf[2].replace(/ in Nijmegen$/, '');
+    const lijst = bedrijvenPerCategorie.get(categorie) ?? [];
+    lijst.push({ naam: bedrijf[1], slug });
+    bedrijvenPerCategorie.set(categorie, lijst);
+  } else {
+    gidsPaginas.push({ naam: titel, slug });
+  }
+}
+
+const categorieen = [...bedrijvenPerCategorie.entries()]
+  .map(([naam, items]) => ({ naam, items: items.sort((a, b) => a.naam.localeCompare(b.naam, 'nl')) }))
+  .sort((a, b) => b.items.length - a.items.length);
+
+gidsPaginas.push({ naam: 'Sitemap', slug: 'sitemap' });
+gidsPaginas.sort((a, b) => a.naam.localeCompare(b.naam, 'nl'));
+
+const berichten = (await getCollection('blog')).sort(
+  (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime(),
+);
+
+const aantalBedrijven = categorieen.reduce((som, c) => som + c.items.length, 0);
+const totaal = 1 + gidsPaginas.length + aantalBedrijven + berichten.length;
+const datum = (d: Date) => d.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' });
 ---
 <html lang="nl">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>De Haas Marketing &amp; Communicatie - Marketing &amp; IT in Nijmegen | De Nijmegen Gids</title>
-  <meta name="description" content="De Haas Marketing &amp; Communicatie: Marketing &amp; IT in Nijmegen. Bekijk adres, telefoonnummer en website." />
-  <link rel="canonical" href="https://denijmegengids.nl/de-haas-marketing-communicatie/" />
+  <title>Sitemap | De Nijmegen Gids</title>
+  <meta name="description" content="Alle pagina's van De Nijmegen Gids op een rij: gidspagina's, bedrijven per categorie en het laatste nieuws." />
+  <link rel="canonical" href="https://denijmegengids.nl/sitemap/" />
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="/assets/gids2026.css" />
 </head>
@@ -34,22 +81,50 @@ export const prerender = true;
   </div>
 </header>
 <main id="main">
-<section class="section-pad bg-[color:var(--bg)]"><div class="container-page">
-  <nav class="text-xs text-[color:var(--text-muted)] mb-6"><a href="/bedrijvengids/" class="hover:underline">Bedrijvengids</a> / <span>Marketing &amp; IT</span></nav>
-  <div class="grid gap-10 lg:grid-cols-3">
-    <div class="lg:col-span-2">
-      <p class="gids-chip mb-3" style="display:inline-flex">Marketing &amp; IT</p>
-      <h1 class="">De Haas Marketing &amp; Communicatie</h1>
-      <p class="text-[color:var(--text-muted)] mt-3">De Haas Marketing &amp; Communicatie is een lokale onderneming in de categorie marketing &amp; it, gevestigd in Nijmegen.</p>
-    </div>
-    <div class="lg:col-span-1">
-      <div class="rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface)] p-6">
-        <h2 class="!text-base font-display font-bold mb-2">Contactgegevens</h2>
-        <ul><li class="flex items-start gap-3 py-2 border-b border-[color:var(--border)]"><span class="text-xs font-bold uppercase text-[color:var(--text-muted)] w-24 flex-shrink-0">Adres</span><span class="text-sm text-[color:var(--text)]">Berg en Dalseweg 277</span></li><li class="flex items-start gap-3 py-2 border-b border-[color:var(--border)]"><span class="text-xs font-bold uppercase text-[color:var(--text-muted)] w-24 flex-shrink-0">Telefoon</span><span class="text-sm text-[color:var(--text)]"><a class="hover:text-[color:var(--color-brand-700)]" href="tel:+31653589714">+31 6 53589714</a></span></li><li class="flex items-start gap-3 py-2"><span class="text-xs font-bold uppercase text-[color:var(--text-muted)] w-24 flex-shrink-0">Website</span><span class="text-sm text-[color:var(--text)]"><a class="hover:text-[color:var(--color-brand-700)] break-all" target="_blank" rel="nofollow noopener" href="http://www.dehaasbcd.nl/">www.dehaasbcd.nl</a></span></li></ul>
+<section class="relative bg-[color:var(--color-brand-800)] overflow-hidden text-white"><div class="container-page"><div class="relative max-w-3xl md:py-16 py-12">
+  <h1 class="!leading-[1.08] !text-[clamp(2.2rem,1.5rem+3.2vw,3.9rem)] text-balance text-white">Sitemap</h1>
+  <p class="leading-relaxed text-[color:var(--color-brand-100)] max-w-2xl md:text-lg mt-4 text-base">Alle {totaal} pagina&rsquo;s van De Nijmegen Gids op een rij. Zoekmachines gebruiken de <a class="underline hover:text-white" href="/sitemap.xml">XML-sitemap</a>.</p>
+</div></div></section>
+
+<section class="section-pad"><div class="container-page">
+  <div class="kop-wijzer mb-2"><p class="text-xs font-bold uppercase text-[color:var(--color-accent-600)] tracking-[0.16em]">Gids &amp; overzicht</p></div>
+  <h2 class="font-display text-2xl md:text-3xl mb-6">Pagina&rsquo;s van de gids <span class="font-normal text-[color:var(--text-muted)] text-base">({gidsPaginas.length + 1})</span></h2>
+  <ul class="gap-x-6 gap-y-2 grid sm:grid-cols-2 lg:grid-cols-3 text-sm">
+    <li><a class="transition-colors hover:text-[color:var(--color-brand-700)] font-semibold text-[color:var(--text)]" href="/">Home</a></li>
+    {gidsPaginas.map((p) => (
+      <li><a class="transition-colors hover:text-[color:var(--color-brand-700)] text-[color:var(--text)]" href={`/${p.slug}/`}>{p.naam}</a></li>
+    ))}
+  </ul>
+</div></section>
+
+<section class="bg-[color:var(--surface-muted)] border-[color:var(--border)] border-y section-pad"><div class="container-page">
+  <div class="kop-wijzer mb-2"><p class="text-xs font-bold uppercase text-[color:var(--color-accent-600)] tracking-[0.16em]">Bedrijvengids</p></div>
+  <h2 class="font-display text-2xl md:text-3xl mb-8">Bedrijven per categorie <span class="font-normal text-[color:var(--text-muted)] text-base">({aantalBedrijven})</span></h2>
+  <div class="space-y-6">
+    {categorieen.map((c) => (
+      <div>
+        <h3 class="border-[color:var(--border)] border-b font-display font-semibold mb-4 py-2 text-lg">{c.naam} <span class="font-normal text-[color:var(--text-muted)] text-sm">({c.items.length})</span></h3>
+        <ul class="gap-x-6 gap-y-2 grid sm:grid-cols-2 lg:grid-cols-3 text-sm">
+          {c.items.map((b) => (
+            <li><a class="transition-colors hover:text-[color:var(--color-brand-700)] text-[color:var(--text)]" href={`/${b.slug}/`}>{b.naam}</a></li>
+          ))}
+        </ul>
       </div>
-      <div class="rounded-2xl border border-[color:var(--border)] bg-[color:var(--surface)] p-6 mt-6"><h2 class="!text-base font-display font-bold mb-2">Meer Marketing &amp; IT in de regio</h2><a class="block py-2 border-b border-[color:var(--border)] text-sm text-[color:var(--text)] hover:text-[color:var(--color-brand-700)]" href="/10xbeter-marketing/">10xbeter Marketing</a><a class="block py-2 border-b border-[color:var(--border)] text-sm text-[color:var(--text)] hover:text-[color:var(--color-brand-700)]" href="/3steps-ict/">3Steps ICT</a><a class="block py-2 border-b border-[color:var(--border)] text-sm text-[color:var(--text)] hover:text-[color:var(--color-brand-700)]" href="/aanpoters-marketing/">Aanpoters marketing</a><a class="block py-2 border-b border-[color:var(--border)] text-sm text-[color:var(--text)] hover:text-[color:var(--color-brand-700)]" href="/apollo8-agency/">Apollo8 Agency</a><a class="block py-2 border-b border-[color:var(--border)] text-sm text-[color:var(--text)] hover:text-[color:var(--color-brand-700)]" href="/appel-automatisering/">Appel Automatisering</a></div>
-    </div>
+    ))}
   </div>
+</div></section>
+
+<section class="section-pad"><div class="container-page">
+  <div class="kop-wijzer mb-2"><p class="text-xs font-bold uppercase text-[color:var(--color-accent-600)] tracking-[0.16em]">Nieuws</p></div>
+  <h2 class="font-display text-2xl md:text-3xl mb-6">Artikelen <span class="font-normal text-[color:var(--text-muted)] text-base">({berichten.length})</span></h2>
+  <ul class="gap-x-6 gap-y-2 grid sm:grid-cols-2 text-sm">
+    {berichten.map((post) => (
+      <li>
+        <a class="transition-colors hover:text-[color:var(--color-brand-700)] text-[color:var(--text)]" href={`/${post.id}/`}>{post.data.title}</a>
+        <span class="block tabular-nums text-[color:var(--text-muted)] text-xs">{datum(post.data.pubDate)}</span>
+      </li>
+    ))}
+  </ul>
 </div></section>
 </main>
 <footer class="bg-[color:var(--color-brand-900)] mt-24 text-[color:var(--color-brand-100)]">
