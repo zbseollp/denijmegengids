@@ -11,7 +11,7 @@
     "preview": "astro preview",
     "deploy": "npm run build && npx wrangler deploy",
     "astro": "astro",
-    "prepare:blog": "node scripts/assert-blog-count.mjs --snapshot && node scripts/remove-spam-blog.mjs && node scripts/sanitize-blog.mjs && node scripts/validate-blog.mjs && node scripts/assert-blog-count.mjs --verify",
+    "prepare:blog": "node scripts/assert-blog-count.mjs --snapshot && node scripts/sanitize-blog.mjs && node scripts/validate-blog.mjs && node scripts/assert-blog-count.mjs --verify",
     "guard:deploy": "node scripts/guard-deploy.mjs",
     "assert:publish": "node scripts/assert-publish-ready.mjs"
   },
