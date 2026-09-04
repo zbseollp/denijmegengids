@@ -1,7 +1,9 @@
 {
   "version": 1,
   "tenantSlug": "denijmegengids",
+  "githubRepo": "zbseollp/denijmegengids",
   "modules": ["blog"],
+  "enabledModules": ["blog"],
   "blogContentPath": "src/content/blog",
   "blogFileExtension": "md"
 }

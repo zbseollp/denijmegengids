@@ -1,8 +1,11 @@
 #!/usr/bin/env node
 /**
  * Fail the build early on frontmatter that would drop a post from the
- * collection (missing title, unparseable date) instead of letting Astro
- * report it as an opaque schema error mid-build.
+ * collection (missing title) instead of letting Astro report it as an opaque
+ * schema error mid-build.
+ *
+ * Odd / missing dates are warnings only — looseDateField + a Date(0) fallback
+ * keep those posts in the build so they still come online.
  */
 import { BLOG_DIR, exists, listBlogFiles, readField, readPost } from './lib/blog-files.mjs';
 
@@ -23,12 +26,17 @@ for (const path of files) {
   }
 
   const title = readField(post.frontmatter, 'title');
-  if (!title) errors.push(`${path}: missing title`);
+  if (!title || title === '|' || title === '>') {
+    errors.push(`${path}: missing title`);
+  }
 
   const rawDate = readField(post.frontmatter, 'pubDate') ?? readField(post.frontmatter, 'date');
-  if (!rawDate) errors.push(`${path}: missing pubDate/date`);
-  else if (Number.isNaN(new Date(rawDate).valueOf())) {
-    errors.push(`${path}: unparseable date "${rawDate}"`);
+  if (!rawDate) {
+    warnings.push(`${path}: missing pubDate/date (will fall back)`);
+  } else if (rawDate !== '|' && rawDate !== '>' && Number.isNaN(new Date(rawDate).valueOf())) {
+    // WP-style "YYYY-MM-DD HH:mm:ss" still parses via looseDateField at build time.
+    const looseOk = /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}/.test(rawDate);
+    if (!looseOk) warnings.push(`${path}: odd date "${rawDate}" (will try loose parse)`);
   }
 
   const description =

@@ -114,7 +114,11 @@ for (const path of listBlogFiles()) {
         ? ''
         : block,
     )
-    .replace(/^.*document\s*\.\s*write\s*\([\s\S]*?\).*$/gim, '');
+    .replace(/^.*document\s*\.\s*write\s*\([\s\S]*?\).*$/gim, '')
+    // Known SEO malware / affiliate hosts — drop the sentence, keep the article.
+    .replace(/[^.!?\n]*\b(?:snellevolgers\.nl|thegameroom\.org)\b[^.!?\n]*[.!?]?/gi, '')
+    .replace(/[^.!?\n]*\b(?:youtube\s+)?weergaven\s+(?:te\s+)?(?:bestellen|kopen)\b[^.!?\n]*[.!?]?/gi, '')
+    .replace(/[^.!?\n]*\bcruks\s+omzeilen\b[^.!?\n]*[.!?]?/gi, '');
 
   body = normalizeHybridMarkdown(body);
 

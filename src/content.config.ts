@@ -1,6 +1,12 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
-import { imageField, draftField, statusField, stringListField } from './lib/blog-schema';
+import {
+  imageField,
+  draftField,
+  statusField,
+  stringListField,
+  looseDateField,
+} from './lib/blog-schema';
 
 /**
  * Payload-synced posts: title is the only hard requirement. Everything else
@@ -15,9 +21,9 @@ const blogSchema = z
     excerpt: z.string().optional(),
     metaTitle: z.string().optional(),
     metaDescription: z.string().optional(),
-    pubDate: z.coerce.date().optional(),
-    date: z.coerce.date().optional(),
-    updatedDate: z.coerce.date().optional(),
+    pubDate: looseDateField,
+    date: looseDateField,
+    updatedDate: looseDateField,
     author: z.string().optional(),
     categories: stringListField,
     tags: stringListField,

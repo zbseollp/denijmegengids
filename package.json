@@ -7,12 +7,13 @@
   },
   "scripts": {
     "dev": "npm run prepare:blog && astro dev",
-    "build": "npm run prepare:blog && astro build",
+    "build": "npm run prepare:blog && node scripts/assert-publish-ready.mjs && astro build && node scripts/assert-publish-ready.mjs --dist && node scripts/guard-deploy.mjs",
     "preview": "astro preview",
-    "deploy": "npm run build && node scripts/guard-deploy.mjs && npx wrangler deploy",
+    "deploy": "npm run build && npx wrangler deploy",
     "astro": "astro",
     "prepare:blog": "node scripts/assert-blog-count.mjs --snapshot && node scripts/remove-spam-blog.mjs && node scripts/sanitize-blog.mjs && node scripts/validate-blog.mjs && node scripts/assert-blog-count.mjs --verify",
-    "guard:deploy": "node scripts/guard-deploy.mjs"
+    "guard:deploy": "node scripts/guard-deploy.mjs",
+    "assert:publish": "node scripts/assert-publish-ready.mjs"
   },
   "dependencies": {
     "astro": "^5.18.2"

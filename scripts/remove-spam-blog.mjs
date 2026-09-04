@@ -30,14 +30,47 @@ const INJECTION_PATTERNS = [
   /window\s*\.\s*location\s*(?:\.\s*(?:href|replace)\s*[=(]|\s*=)/i,
   /<meta[^>]+http-equiv=["']?refresh["']?[^>]*url=/i,
 ];
+
+/** Affiliate / SMM / casino payloads that are malware-adjacent SEO spam. */
+const HARD_SPAM_BODY_PATTERNS = [
+  /\bsnellevolgers\.nl\b/i,
+  /\bthegameroom\.org\b/i,
+  /\b(?:youtube\s+)?weergaven\s+(?:te\s+)?(?:bestellen|kopen)\b/i,
+  /\bcruks\s+omzeilen\b/i,
+  /\bkoop\s+(?:nu\s+)?(?:likes|volgers|views|weergaven)\b/i,
+  /\bbuy\s+(?:likes|followers|views)\b/i,
+  /\bsmm[\s-]?panel\b/i,
+];
+
 const OFF_TOPIC_TITLE_PATTERNS = [
   /\bvriendin\b/i,
   /\bvriend van\b/i,
   /\bgetrouwd\b/i,
+  /\bgescheiden\b/i,
   /\brelatiestatus\b/i,
   /\bex-partner\b/i,
   /\bzwanger\b/i,
-  /\b(?:vermogen|lengte|leeftijd) van\b/i,
+  /\b(?:vermogen|lengte|leeftijd)\b/i,
+  /\bpartner\b/i,
+  /\blikes\s+kopen\b/i,
+  /\bkopen\s+van\s+(?:youtube\s+)?views?\b/i,
+  /\bviews?\s+kopen\b/i,
+  /\blive\s+viewers?\b/i,
+  /\bsoundcloud\b/i,
+  /\btwitter\s+bereik\b/i,
+  /\btwitter\s+accounts?\b/i,
+  /\btiktok\b/i,
+  /\byoutube\s+reactie\b/i,
+  /\bvolgers\b/i,
+  /\bgokwetgeving\b/i,
+  /\bonline\s+casino/i,
+  /\bomgekeerd\s+telefoonnummer\b/i,
+  /\britstrekker\b/i,
+  /\bkinderseries\b/i,
+  /\bbasic\s+fit\s+deventer\b/i,
+  /\bschoorsteenveger\s+in\s+utrecht\b/i,
+  /\blisa\s+westerveld\b/i,
+  /\byoutube\s+op\s+maatschappelijk\b/i,
 ];
 
 if (!exists(BLOG_DIR)) {
@@ -55,6 +88,10 @@ for (const path of listBlogFiles()) {
 
   if (INJECTION_PATTERNS.some((p) => p.test(haystack))) {
     spam.push({ path, title, reason: 'injected script/redirect payload' });
+    continue;
+  }
+  if (HARD_SPAM_BODY_PATTERNS.some((p) => p.test(haystack))) {
+    spam.push({ path, title, reason: 'affiliate/SMM/casino spam payload' });
     continue;
   }
   if (OFF_TOPIC_TITLE_PATTERNS.some((p) => p.test(`${post.slug.replace(/-/g, ' ')} ${title}`))) {

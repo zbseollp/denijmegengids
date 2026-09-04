@@ -5,6 +5,8 @@ pubDate: 2026-01-12
 author: "Redactie"
 categories: ["Nieuws"]
 tags: []
+draft: true
+_spam: "off-topic"
 ---
 
 Een open haard of kachel is gezellig, warm en perfect voor lange avonden op de bank. Toch vergeten veel mensen wat er achter dat knusse vuurtje schuilgaat. Een schoorsteen heeft aandacht nodig. In een stad als Utrecht, met veel oude huizen, is dat geen overbodige luxe maar gewoon slim geregeld.

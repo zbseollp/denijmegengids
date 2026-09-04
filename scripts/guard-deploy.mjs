@@ -12,9 +12,10 @@
  * (That is exactly how 34 posts were lost on 2026-09-03.)
  *
  * This crawls the live blog listing, compares it against dist/, and fails when
- * the deploy would drop anything. Wire it in front of every deploy:
+ * the deploy would drop anything. Wire it at the end of `build` (Jenkins runs
+ * `npm run build` then wrangler — it never runs `npm run deploy`):
  *
- *   "deploy": "npm run build && node scripts/guard-deploy.mjs && wrangler deploy"
+ *   "build": "… && astro build && node scripts/guard-deploy.mjs"
  *
  * Override deliberately with ALLOW_CONTENT_LOSS=1 once the missing posts have
  * been exported or re-imported — never as a reflex to get a deploy through.
@@ -46,6 +47,22 @@ function builtRoutes(dir = 'dist', base = '') {
     }
   }
   return out;
+}
+
+/**
+ * Intentional malware takedown: source still exists but is `draft: true` with
+ * `_spam:` — those live URLs are allowed to disappear from the next deploy.
+ */
+function isIntentionalSpamDrop(urlPath) {
+  const slug = urlPath.replace(/^\/+|\/+$/g, '').split('/').pop();
+  if (!slug) return false;
+  for (const ext of ['.mdx', '.md']) {
+    const file = join('src/content/blog', `${slug}${ext}`);
+    if (!existsSync(file)) continue;
+    const raw = readFileSync(file, 'utf8');
+    return /^draft:\s*true\b/m.test(raw) && /^_spam:/m.test(raw);
+  }
+  return false;
 }
 
 async function fetchText(url) {
@@ -155,7 +172,12 @@ for (const m of html.matchAll(ARTICLE_LINK)) {
 const candidates = [...liveLinks].filter((u) => !built.has(u)).sort();
 const missing = [];
 const alreadyDead = [];
+const spamDrops = [];
 for (const u of candidates) {
+  if (isIntentionalSpamDrop(u)) {
+    spamDrops.push(u);
+    continue;
+  }
   let ok = false;
   try {
     const res = await fetch(origin + u, { redirect: 'follow', signal: AbortSignal.timeout(20000) });
@@ -164,6 +186,12 @@ for (const u of candidates) {
     ok = false; // unreachable → treat as dead rather than blocking the deploy
   }
   (ok ? missing : alreadyDead).push(u);
+}
+if (spamDrops.length > 0) {
+  console.log(
+    `[guard-deploy] allowing ${spamDrops.length} intentional spam draft drop(s): ` +
+      spamDrops.slice(0, 5).join(', ') + (spamDrops.length > 5 ? ' …' : ''),
+  );
 }
 if (alreadyDead.length > 0) {
   console.log(

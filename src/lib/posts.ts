@@ -10,6 +10,13 @@ import { resolveFeaturedImage, resolveFeaturedImageAlt } from './blogImages';
 
 export type Post = CollectionEntry<'blog'>;
 
+/**
+ * CMS clocks and "publish now" often land a few hours ahead of the build host.
+ * Only hide posts scheduled clearly in the future — not same-day skew.
+ * Keep in sync with scripts/assert-publish-ready.mjs (FUTURE_SLACK_MS).
+ */
+export const FUTURE_SLACK_MS = 48 * 60 * 60 * 1000;
+
 /** Payload writes a boolean; WordPress exports write the string "true". */
 function isDraft(data: Post['data']): boolean {
   const draft = (data as { draft?: unknown }).draft;
@@ -31,7 +38,12 @@ export function postPublishTime(post: Post): number {
   if (d.updatedDate instanceof Date && !Number.isNaN(d.updatedDate.valueOf())) {
     return d.updatedDate.valueOf();
   }
+  // Missing/unparseable dates must still come online (schema falls back to epoch).
   return 0;
+}
+
+export function isLiveByDate(post: Post, now = Date.now()): boolean {
+  return postPublishTime(post) <= now + FUTURE_SLACK_MS;
 }
 
 export function sortPostsNewestFirst(posts: Post[]): Post[] {
@@ -47,8 +59,7 @@ async function loadAll(): Promise<Post[]> {
   if (cached) return cached;
   const now = Date.now();
   const all = await getCollection('blog', ({ data }) => isPublished(data) && !isDraft(data));
-  // A minute of slack absorbs clock skew between the CMS and the build host.
-  cached = sortPostsNewestFirst(all.filter((post) => postPublishTime(post) <= now + 60_000));
+  cached = sortPostsNewestFirst(all.filter((post) => isLiveByDate(post, now)));
   return cached;
 }
 
@@ -63,8 +74,9 @@ export async function getRecentPosts(n = 6): Promise<Post[]> {
 export async function getRelatedPosts(current: Post, n = 3): Promise<Post[]> {
   const all = await loadAll();
   const others = all.filter((p) => p.id !== current.id);
+  const currentCats = current.data.categories ?? [];
   const sameCategory = others.filter((p) =>
-    p.data.categories.some((c) => current.data.categories.includes(c)),
+    (p.data.categories ?? []).some((c) => currentCats.includes(c)),
   );
   const filler = others.filter((p) => !sameCategory.includes(p));
   return [...sameCategory, ...filler].slice(0, n);

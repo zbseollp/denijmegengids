@@ -5,6 +5,8 @@ pubDate: 2023-12-15
 author: "Redactie"
 categories: ["Nieuws"]
 tags: []
+draft: true
+_spam: "off-topic"
 ---
 
 Lisa Westerveld heeft in haar woonplaats Nijmegen een onuitwisbare indruk gemaakt als gemeenteraadslid. De voor haar kenmerkende vastberadenheid en toewijding laat ze sinds 2017 ook in de Tweede Kamer zien. Lees hier meer over deze gedreven Nederlandse politicus. 

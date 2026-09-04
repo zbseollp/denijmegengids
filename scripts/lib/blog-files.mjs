@@ -30,14 +30,30 @@ export function splitFrontmatter(raw) {
   };
 }
 
+/**
+ * Read a frontmatter scalar. Handles:
+ *   title: "Quoted"
+ *   title: Plain
+ *   title: |
+ *     Block scalar spanning lines
+ *   title: >
+ *     Folded scalar
+ */
 export function readField(frontmatter, field) {
-  const match = frontmatter.match(new RegExp(`^${field}:\\s*(.*)$`, 'm'));
+  const match = frontmatter.match(
+    new RegExp(`^${field}:\\s*(.*?)(?:\\r?\\n(?![ \\t])|$)`, 'ms'),
+  );
   if (!match) return null;
-  return match[1].trim().replace(/^["']|["']$/g, '') || null;
+  let value = match[1].trim();
+  if (value === '|' || value === '>' || value.startsWith('|') || value.startsWith('>')) {
+    const lines = value.split(/\r?\n/).slice(1);
+    value = lines.map((l) => l.replace(/^[ \t]+/, '')).join(' ').trim();
+  }
+  return value.replace(/^["']|["']$/g, '') || null;
 }
 
 export function slugOf(path) {
-  return path.split('/').pop().replace(/\.mdx?$/, '');
+  return path.split(/[/\\]/).pop().replace(/\.mdx?$/, '');
 }
 
 export function readPost(path) {
