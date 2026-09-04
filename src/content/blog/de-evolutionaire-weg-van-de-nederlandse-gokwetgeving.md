@@ -5,8 +5,6 @@ pubDate: 2025-10-30
 author: "Redactie"
 categories: ["Nieuws"]
 tags: []
-draft: true
-_spam: "affiliate/SMM/casino spam payload"
 ---
 
 In Nederland kent de regulering van kansspelen een lange geschiedenis. De basis werd gelegd met de Wet op de kansspelen uit 1964, die het aanbieden van kansspelen zonder vergunning verbood en de Staat exclusieve rechten gaf voor bepaalde spellen. Maar vanaf de jaren tachtig is er veel veranderd. In dit artikel kijken we naar de belangrijkste mijlpalen, de impact op fysieke casino’s, loterijen en de online sector, en hoe de situatie er in 2025 uitziet.

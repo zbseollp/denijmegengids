@@ -1,5 +1,8 @@
 import { defineConfig } from "astro/config";
 import rehypeRepairMediaUrls from './src/lib/rehype-repair-media-urls.mjs';
+import { createRequire } from 'module';
+
+const require = createRequire(import.meta.url);
 
 export default defineConfig({
   vite: { envPrefix: ['PUBLIC_', 'R2_', 'TENANT', 'PAYLOAD_'] },

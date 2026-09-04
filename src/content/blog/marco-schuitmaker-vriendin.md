@@ -5,8 +5,6 @@ pubDate: 2025-04-07
 author: "Redactie"
 categories: ["Nieuws"]
 tags: []
-draft: true
-_spam: "off-topic"
 ---
 
 april 7, 2025					

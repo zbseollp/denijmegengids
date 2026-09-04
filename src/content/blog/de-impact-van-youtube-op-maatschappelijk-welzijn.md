@@ -5,8 +5,6 @@ pubDate: 2024-07-04
 author: "Redactie"
 categories: ["Nieuws"]
 tags: []
-draft: true
-_spam: "affiliate/SMM/casino spam payload"
 ---
 
 YouTube is meer dan alleen een platform voor entertainment; het is een krachtig medium dat een aanzienlijke invloed kan hebben op het maatschappelijk welzijn. Door middel van video’s kunnen mensen bewustwording creëren, gemeenschappen opbouwen en positieve verandering stimuleren. In dit artikel bespreken we hoe YouTube bijdraagt aan het maatschappelijk welzijn en hoe je meer impact kunt maken met je eigen kanaal.
