@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { getCollection } from 'astro:content';
+import { getAllPosts, postDisplayDate } from '../lib/posts';
 
 export const prerender = true;
 
@@ -19,8 +20,9 @@ export const GET: APIRoute = async () => {
     urls.set(`${SITE}/${slug}`, undefined);
   }
 
-  for (const post of await getCollection('blog')) {
-    const lastmod = post.data.updatedDate ?? post.data.pubDate;
+  // Only live posts — a sitemap entry for a draft or unpublished post is a 404.
+  for (const post of await getAllPosts()) {
+    const lastmod = post.data.updatedDate ?? postDisplayDate(post);
     urls.set(`${SITE}/${post.id}/`, lastmod.toISOString().slice(0, 10));
   }
 

@@ -6,11 +6,13 @@
     "node": ">=22.12.0"
   },
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
+    "dev": "npm run prepare:blog && astro dev",
+    "build": "npm run prepare:blog && astro build",
     "preview": "astro preview",
-    "deploy": "npm run build && npx wrangler deploy",
-    "astro": "astro"
+    "deploy": "npm run build && node scripts/guard-deploy.mjs && npx wrangler deploy",
+    "astro": "astro",
+    "prepare:blog": "node scripts/assert-blog-count.mjs --snapshot && node scripts/remove-spam-blog.mjs && node scripts/sanitize-blog.mjs && node scripts/validate-blog.mjs && node scripts/assert-blog-count.mjs --verify",
+    "guard:deploy": "node scripts/guard-deploy.mjs"
   },
   "dependencies": {
     "astro": "^5.18.2"

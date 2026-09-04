@@ -1,7 +1,8 @@
 ---
 export const prerender = true;
-import { getCollection } from 'astro:content';
-const posts = (await getCollection('blog')).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+import { getAllPosts } from '../../lib/posts';
+import PostCard from '../../components/PostCard.astro';
+const posts = await getAllPosts();
 ---
 <html lang="nl">
 <head>
@@ -45,12 +46,8 @@ const posts = (await getCollection('blog')).sort((a, b) => b.data.pubDate.valueO
 <section class="section-pad bg-[color:var(--bg)]"><div class="container-page">
   <h1 class="!text-[clamp(2.2rem,1.5rem+3.2vw,3.9rem)] !leading-[1.08] mb-8">Nieuws Nijmegen</h1>
   <div class="grid lg:grid-cols-3 sm:grid-cols-2 gap-x-6 gap-y-8">
-    {posts.map((post) => (
-      <a class="group block" href={`/${post.id}/`}>
-        <p class="font-semibold text-[color:var(--text-muted)] mb-1.5 text-xs">{post.data.pubDate.toISOString().slice(0, 10)}</p>
-        <h3 class="transition-colors font-semibold !leading-snug !text-lg dark:group-hover:text-brand-300 font-display group-hover:text-[color:var(--color-brand-700)] text-[color:var(--text)]">{post.data.title}</h3>
-        <p class="text-sm text-[color:var(--text-muted)] mt-2 leading-relaxed line-clamp-2">{post.data.description}</p>
-      </a>
+    {posts.map((post, i) => (
+      <PostCard post={post} loading={i < 3 ? 'eager' : 'lazy'} />
     ))}
   </div>
 </div></section>
