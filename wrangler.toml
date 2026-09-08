@@ -1,4 +1,5 @@
 name = "denijmegengids"
+account_id = "54b144d6836138e432688b9d5f4ec8aa"
 compatibility_date = "2025-01-01"
 compatibility_flags = ["nodejs_compat"]
 
